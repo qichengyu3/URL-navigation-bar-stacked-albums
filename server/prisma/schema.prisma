@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String
+  slug      String     @unique
+  parentId  Int?
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Category[] @relation("CategoryHierarchy")
+  sites     Site[]
+}
+
+model Site {
+  id          Int       @id @default(autoincrement())
+  title       String
+  url         String    @unique
+  description String?
+  icon        String?
+  iconType    String    @default("auto")
+  categoryId  Int?
+  categoryIds String?
+  sortOrder   Int       @default(0)
+  clickCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  clicks      ClickLog[]
+}
+
+// 每次点击一条日志，用于按天/周/月/季度统计点击量排名
+model ClickLog {
+  id        Int      @id @default(autoincrement())
+  siteId    Int
+  createdAt DateTime @default(now())
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId, createdAt])
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Album {
+  id        Int      @id @default(autoincrement())
+  name      String
+  city      String?
+  desc      String?
+  cover     String? // 封面完整 URL
+  coverKey  String? // 封面在 COS 的 Key（删除时同步）
+  dir       String   @default("h") // 封面横竖 h/v
+  ar        String   @default("16 / 10")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  photos    Photo[]
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  albumId   Int
+  url       String
+  key       String // COS Key（删除时同步）
+  thumbKey  String? // 缩略图 COS Key（瀑布流用，空则前端回退大图）
+  title     String?
+  ar        String   @default("16 / 9")
+  width     Int?
+  height    Int?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId])
+}

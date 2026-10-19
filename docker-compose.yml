@@ -1,0 +1,37 @@
+services:
+  server:
+    build: ./server
+    container_name: tabb-server
+    restart: unless-stopped
+    volumes:
+      - ./server/prisma:/app/prisma
+      - ./server/uploads:/app/uploads
+      # 备份快照落在宿主机，容器重建后依然可下载
+      - ./server/backups:/app/backups
+    environment:
+      - NODE_ENV=production
+      # 未设置 JWT_SECRET 时容器会拒绝启动（安全要求）
+      - JWT_SECRET=${JWT_SECRET:?部署前请设置 JWT_SECRET 环境变量}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    networks:
+      - tabb-network
+    # 不使用 --accept-data-loss：表结构破坏性变更时直接失败，
+    # 而不是静默丢数据
+    command: >
+      sh -c "npx prisma db push && npm start"
+
+  client:
+    build: ./client
+    container_name: tabb-client
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - tabb-network
+
+networks:
+  tabb-network:
+    driver: bridge

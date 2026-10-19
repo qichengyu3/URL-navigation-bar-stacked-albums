@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .site-card {
+    @apply bg-white rounded-xl p-4 shadow-sm border border-slate-100 transition-all duration-200;
+  }
+
+  .site-card:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  .category-btn {
+    @apply w-full text-left px-4 py-2.5 rounded-lg text-slate-600 transition-all duration-150;
+  }
+
+  .category-btn:hover {
+    @apply bg-slate-100;
+  }
+
+  .category-btn.active {
+    @apply bg-primary-50 text-primary;
+  }
+
+  .search-input {
+    @apply w-full h-11 pl-11 pr-4 rounded-full border border-slate-200 bg-white transition-all duration-200;
+  }
+
+  .search-input:focus {
+    @apply outline-none border-2 border-primary shadow-sm;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

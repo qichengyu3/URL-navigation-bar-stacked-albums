@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log*
+.env
+.env.*
+!.env.example
+uploads
+backups/*
+!backups/.gitkeep
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db.bak*
+*.rar
+dist
+.git
+.gitignore
+Dockerfile
+.dockerignore

@@ -1,0 +1,37 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+client/dist/
+client/dist.rar
+server/server.rar
+
+# 环境变量（.env.example 除外）
+.env
+.env.local
+.env.*.local
+server/.env
+
+# 数据库与运行时数据
+server/prisma/*.db
+server/prisma/*.db-journal
+server/prisma/*.db.bak-*
+server/data/
+server/uploads/
+server/backups/
+server/logs/
+
+# 打包与部署产物
+deploy/*.tar.gz
+deploy/.stage/
+
+# 日志
+*.log
+npm-debug.log*
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
