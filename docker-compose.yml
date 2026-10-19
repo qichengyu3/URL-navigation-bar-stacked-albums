@@ -4,22 +4,29 @@ services:
     container_name: tabb-server
     restart: unless-stopped
     volumes:
-      - ./server/prisma:/app/prisma
+      # 只挂载数据库文件本身，不挂整个 prisma 目录，
+      # 否则空目录会盖掉镜像里的 schema.prisma，导致 db push 失败
+      - ./server/prisma/dev.db:/app/prisma/dev.db
+      # 上传的图标、备份快照落宿主机，容器重建不丢
       - ./server/uploads:/app/uploads
-      # 备份快照落在宿主机，容器重建后依然可下载
       - ./server/backups:/app/backups
+      # 对象存储解密密钥（配置了 COS 才需要）
+      - ./server/data:/app/data
     environment:
       - NODE_ENV=production
       # 未设置 JWT_SECRET 时容器会拒绝启动（安全要求）
       - JWT_SECRET=${JWT_SECRET:?部署前请设置 JWT_SECRET 环境变量}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      # 可选：首次 seed 创建的管理员账号，留空则用默认 admin / admin12345
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
     networks:
       - tabb-network
-    # 不使用 --accept-data-loss：表结构破坏性变更时直接失败，
-    # 而不是静默丢数据
+    # seed 幂等（全部 upsert），每次启动跑一遍安全。
+    # 不用 --accept-data-loss：表结构破坏性变更直接失败，不静默丢数据
     command: >
-      sh -c "npx prisma db push && npm start"
+      sh -c "npx prisma db push && node prisma/seed.js && npm start"
 
   client:
     build: ./client
